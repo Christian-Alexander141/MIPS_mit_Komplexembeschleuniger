@@ -22,6 +22,10 @@ Projekt zur Anbindung eines Hardware-Beschleunigers für komplexe Zahlen an eine
 
 ---
 
+## 🖼️ Architekturübersicht
+
+![Busstruktur](Busstruktur_logisch(1).svg)
+
 ## 🏗️ Projektstruktur
 
 ```

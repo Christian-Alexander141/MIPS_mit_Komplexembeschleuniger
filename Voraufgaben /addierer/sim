@@ -1,0 +1,116 @@
+=================================================================
+ Anleitung: Simulation mit GHDL und Auswertung mit GTKWave
+=================================================================
+
+0. Vorbereitung (einmal pro Terminal)
+-------------------------------------
+GHDL und GTKWave liegen in der oss-cad-suite von apio. Falls
+"ghdl" oder "gtkwave" nicht gefunden wird:
+
+    export PATH=~/.apio/packages/oss-cad-suite/bin:$PATH
+
+Dann in den Ordner des Projekts wechseln, z.B.:
+
+    cd "Voraufgaben /addierer"
+
+
+1. Analysieren (-a)
+-------------------
+Prueft die Syntax und uebersetzt die Dateien in die Bibliothek
+"work". Reihenfolge beachten: erst das Design, dann die Testbench,
+weil die Testbench das Design benutzt.
+
+    ghdl -a --std=08 adder.vhd
+    ghdl -a --std=08 adder_tb.vhd
+
+Fehler hier sind Syntaxfehler, z.B.
+  - "'begin' is expected"      -> begin der Architecture fehlt
+  - "no declaration for signed" -> use ieee.numeric_std.all; fehlt
+
+
+2. Elaborieren (-e)
+-------------------
+Baut aus der Top-Entity (der Testbench!) ein ausfuehrbares
+Simulationsmodell. Angegeben wird der Entity-Name, nicht die Datei.
+
+    ghdl -e --std=08 adder_tb
+
+
+3. Simulieren (-r)
+------------------
+Fuehrt die Simulation aus und schreibt alle Signalverlaeufe in eine
+VCD-Datei.
+
+    ghdl -r --std=08 adder_tb --vcd=adder.vcd --stop-time=30ns
+
+  --vcd=...        Datei fuer GTKWave
+  --stop-time=...  Simulation spaetestens hier beenden (wichtig, wenn
+                   die Testbench nicht mit "wait;" endet)
+
+Ausgabe lesen:
+  "(report note)"      -> Meldung aus der Testbench
+  "(assertion error)"  -> ein assert ist fehlgeschlagen, Test falsch!
+Kommt kein "assertion error", haben alle Tests bestanden.
+
+
+4. Wellenform ansehen mit GTKWave
+---------------------------------
+    gtkwave adder.vcd &
+
+  (Das "&" laesst das Terminal frei.)
+
+Bedienung:
+  1. Links oben im Fenster "SST" die Testbench anklicken
+     (z.B. "adder_tb"). Darunter erscheinen ihre Signale.
+  2. Signale (a, b, sum) markieren und mit "Append" unten links oder
+     per Drag & Drop in die Spalte "Signals" ziehen.
+  3. Zoom auf alles: Menue Time -> Zoom -> Zoom Best Fit
+     (oder Lupen-Symbol mit dem Quadrat in der Werkzeugleiste).
+  4. Zahlenformat aendern: Rechtsklick auf ein Signal ->
+     Data Format -> Binary / Decimal / Signed Decimal / Hex.
+     Fuer signed-Werte "Signed Decimal" waehlen, sonst wird z.B.
+     1110 als 14 statt -2 angezeigt.
+  5. Mit einem Klick in die Wellenform wird der Marker gesetzt, die
+     Werte zu diesem Zeitpunkt stehen in der Spalte "Values".
+  6. Ansicht speichern: File -> Write Save File (.gtkw). Beim
+     naechsten Mal direkt mit Signalauswahl oeffnen:
+         gtkwave adder.vcd adder.gtkw &
+
+Hinweis: Die Wellenform endet bei der letzten Signalaenderung. Damit
+der letzte Test sichtbar breit ist, in der Testbench vor dem
+abschliessenden "wait;" noch ein "wait for 10 ns;" einfuegen.
+
+
+5. Aufraeumen
+-------------
+GHDL legt Zwischendateien an (*.o, work-obj08.cf, ausfuehrbare Datei
+mit dem Namen der Testbench). Loeschen mit:
+
+    ghdl --remove --std=08
+
+Die .vcd-Datei bleibt dabei erhalten.
+
+
+=================================================================
+ Befehle Addierer
+=================================================================
+ghdl -a --std=08 adder.vhd
+ghdl -a --std=08 adder_tb.vhd
+
+ghdl -e --std=08 adder_tb
+
+ghdl -r --std=08 adder_tb --vcd=adder.vcd --stop-time=30ns
+
+gtkwave adder.vcd &
+
+=================================================================
+ Befehle Komplexer Multiplizierer (im Ordner KomplexMult)
+=================================================================
+ghdl -a --std=08 complexmult.vhd
+ghdl -a --std=08 complexmult_tb.vhd
+
+ghdl -e --std=08 complexmult_tb
+
+ghdl -r --std=08 complexmult_tb --vcd=complexmult.vcd --stop-time=30ns
+
+gtkwave complexmult.vcd &

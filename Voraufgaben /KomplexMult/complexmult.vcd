@@ -1,0 +1,58 @@
+$date
+  Wed Nov  4 19:27:07 2026
+$end
+$version
+  GHDL v0
+$end
+$timescale
+  1 fs
+$end
+$scope module standard $end
+$upscope $end
+$scope module textio $end
+$upscope $end
+$scope module std_logic_1164 $end
+$upscope $end
+$scope module numeric_std $end
+$upscope $end
+$scope module complexmult_tb $end
+$var reg 4 ! a[3:0] $end
+$var reg 4 " b[3:0] $end
+$var reg 8 # c[7:0] $end
+$scope module uut $end
+$var reg 4 $ a[3:0] $end
+$var reg 4 % b[3:0] $end
+$var reg 8 & c[7:0] $end
+$var reg 2 ' a_real[1:0] $end
+$var reg 2 ( b_imag[1:0] $end
+$var reg 2 ) c_real[1:0] $end
+$var reg 2 * d_imag[1:0] $end
+$var reg 4 + real_part[3:0] $end
+$var reg 4 , imag_part[3:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+b0010 !
+b0011 "
+b11100000 #
+b0010 $
+b0011 %
+b11100000 &
+b00 '
+b10 (
+b00 )
+b11 *
+b1110 +
+b0000 ,
+#10000000
+b0001 !
+b1111 "
+b00011111 #
+b0001 $
+b1111 %
+b00011111 &
+b01 (
+b11 )
+b0001 +
+b1111 ,

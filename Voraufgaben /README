@@ -1,0 +1,49 @@
+# Voraufgaben
+
+Die Aufgaben in diesem Ordner dienen der Vorbereitung auf die Eigenentwicklung im Rahmen der
+Bachelorarbeit. Sie üben die Werkzeuge (GHDL, Testbenches, FPGA-Flow) und die Bausteine, die
+später im MIPS-Projekt (`../MIPS`) gebraucht werden.
+
+## Übersicht
+
+| Ordner | Inhalt |
+|--------|--------|
+| `addierer/` | 4-Bit-Addierer (`adder.vhd`) mit Testbench, Pin-Zuordnung (`adder.xdc`) und FPGA-Skript |
+| `KomplexMult/` | Kombinatorische Multiplikation zweier komplexer Zahlen (je 2 Bit Real- und Imaginärteil, Ergebnis 4 + 4 Bit) mit Testbench, Constraints und FPGA-Skript |
+| `sram/` | Übung 9: generischer SRAM (`sram.vhd`) mit Testbench `sram_tb.vhd`; `generic_sram/` enthält die Referenzdateien, `uebung09.pdf` die Aufgabe |
+| `rechner/` | Python-Rechner (`komplex_mult.py`) zur Kontrolle der Ergebnisse der Komplexmultiplikation |
+| `KomplexerBeschleuniger_demo/` | Platz für eine Steuerung des Beschleunigers (`steuerung.vhd`, noch leer) |
+
+Hinweis `KomplexMult`: Ein Überlauf ist möglich. Für a = b = -2-2i ergibt der Imaginärteil +8,
+das passt nicht in 4 Bit mit Vorzeichen (-8 bis 7) und wird als -8 ausgegeben.
+
+## Simulation mit GHDL
+
+Im jeweiligen Ordner (am Beispiel `sram`); alle erzeugten Dateien landen in `sim/`:
+
+```bash
+mkdir -p sim
+ghdl -a --std=08 --workdir=sim sram.vhd sram_tb.vhd
+ghdl -e --std=08 --workdir=sim -o sim/sram_tb sram_tb
+./sim/sram_tb --wave=sim/sram_tb.ghw
+gtkwave sim/sram_tb.ghw
+```
+
+Die Reihenfolge ist wichtig: erst Analysieren (`-a`), dann Elaborieren (`-e`), dann Starten.
+Nach jeder Änderung an den VHDL-Dateien müssen `-a` und `-e` wiederholt werden.
+
+## FPGA (Arty S7-50)
+
+`addierer/` und `KomplexMult/` enthalten ein Skript `fpga.sh`: Synthese mit GHDL und yosys,
+Place & Route mit openXC7 (`nextpnr-xilinx`) und Laden mit `openFPGALoader`.
+
+```bash
+./fpga.sh adder adder.xdc          # im Ordner addierer/
+FLASH=1 ./fpga.sh adder adder.xdc  # dauerhaft ins SPI-Flash statt ins SRAM
+```
+
+Die Tools werden unter `~/.apio/packages/` erwartet. Bei `KomplexMult/` ist der Top-Name
+`complexmult` und die Constraint-Datei `complexmult.xdc`.
+
+Die Ordner `sim/` und `_build/` enthalten erzeugte Dateien. `_build/`, `*.o` und `*.cf` sind
+in `.gitignore` eingetragen.

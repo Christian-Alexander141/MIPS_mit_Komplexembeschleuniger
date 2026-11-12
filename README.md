@@ -1,25 +1,30 @@
 # MIPS_mit_Komplexembeschleuniger
 
+Zur evaluation des im rahmen meiner Bachelorarbeit entwickelten vhdl agenten 
+"Mensch gegen automatik" wird diese aufgabe zunächt händisch und anschliesend
+von der Automatik entwickelt und bis auf das FPGA gebracht, die Entwicklungszeit wird dabei dokumentiert. 
+Zur besseren vergleichbarketi wird der lauf bei der automatik 3 mal wiederholt 
+sowohl die einzelwerte als auch der mittelwert wird angegeben. 
+
+
+
 Projekt zur Anbindung eines Hardware-Beschleunigers für komplexe Zahlen an eine bestehende MIPS-CPU über ein Bus-System. Ziel ist der Vergleich der Entwicklungszeit und -qualität zwischen menschlicher Implementierung und KI-gestützter Entwicklung (VHDL-Agent).
 
 ---
 
 ## 📌 Projektübersicht
-
 ### Gegebene Komponenten
-- **MIPS-CPU**: Bestehende Implementierung einer MIPS-Architektur
-- **Bus-System**: Kommunikationsinfrastruktur zur Anbindung externer Module an die CPU
+- **MIPS-CPU**: Bestehende Implementierung einer MIPS-Architektur (`MIPS/CPU`)
+- **Bus-System**: Logische Busstruktur laut Abbildung unten
 
 ### Zu generierende Komponenten
-
-#### 🤖 Durch Claude/KI zu generieren:
-- **UART-Testblock**: I/O-Einheit zum Laden von Assemblerskripten und Testen der Ausgaben
-- **Speicherblock**: Externer Speicher (nicht im ursprünglichen Design enthalten)
+Beschleuniger, Bus-Anbindung, UART-Testblock und Speicherblock (siehe unten).
 
 #### 👤 Durch Mensch (Entwickler) zu implementieren:
 - **Komplexzahl-Beschleuniger**: Hardware-Modul für Operationen mit komplexen Zahlen
 - **Bus-Anbindung**: Integration des Beschleunigers in das bestehende Bus-System
-
+- **UART-Testblock**: I/O-Einheit zum Laden von Assemblerskripten und Testen der Ausgaben
+- **Speicherblock**: Externer Speicher (nicht im ursprünglichen Design enthalten)
 ---
 
 ## 🖼️ Architekturübersicht
@@ -30,22 +35,24 @@ Projekt zur Anbindung eines Hardware-Beschleunigers für komplexe Zahlen an eine
 
 ```
 MIPS_mit_Komplexembeschleuniger/
-├── src/
-│   ├── mips_cpu/           # Bestehende MIPS-CPU
-│   ├── bus_system/         # Gegebenes Bus-System
-│   ├── accelerator/        # Komplexzahl-Beschleuniger (menschl. Implementierung)
-│   ├── uart/               # UART-Testblock (KI-generiert)
-│   └── memory/             # Speicherblock (KI-generiert)
-├── test/
-│   ├── assembly/           # Test-Assemblerskripte
-│   └── benchmarks/         # Performance-Tests
-├── constraints/            # Constraint-Files für FPGA
-├── docs/                   # Dokumentation & Entwicklungsprotokolle
-│   ├── human_development/  # Zeitdokumentation menschl. Entwicklung
-│   └── agent_development/  # Zeitdokumentation KI-Entwicklung
-├── vivado/                 # Vivado-Projektdateien
+├── Busstruktur_logisch(1).svg   # Abbildung der Busstruktur
+├── MIPS/                        # Menschliche Implementierung (siehe MIPS/Readme)
+│   ├── CPU/                     # Bestehende MIPS-CPU
+│   ├── soc_top.vhd              # Bus (bisher Democode)
+│   ├── RAM/                     # Speicherblock
+│   ├── UART/                    # UART-Testblock
+│   └── KomplexerBeschläuniger/  # Komplexzahl-Beschleuniger
+├── Voraufgaben /                # Vorübungen (siehe Voraufgaben /README)
+│   ├── addierer/                # 4-Bit-Addierer
+│   ├── KomplexMult/             # Komplexmultiplikation
+│   ├── sram/                    # Übung 9: generischer SRAM
+│   ├── rechner/                 # Python-Kontrollrechner
+│   └── KomplexerBeschleuniger_demo/
 └── README.md
 ```
+
+Geplant, aber noch nicht angelegt: Test-Assemblerskripte und Benchmarks, Constraint-Files für
+das Gesamtsystem, Zeitdokumentation (Mensch / KI-Agent) und die KI-generierten Komponenten.
 
 ---
 
@@ -98,6 +105,10 @@ Beide Phasen werden detailliert dokumentiert:
 | Testabdeckung | [zu dokumentieren] | [zu dokumentieren] |
 | Ressourcenverbrauch (FPGA) | [zu dokumentieren] | [zu dokumentieren] |
 
+Entwicklungsbegin Mensch 09.11.26: 11Uhr
+* recherche anbindung einer cpu an einen bus 
+* durchgehen der vorübungen 
+
 ---
 
 ## 🔧 Technische Anforderungen
@@ -124,24 +135,23 @@ Beide Phasen werden detailliert dokumentiert:
 ## 🚀 Deployment
 
 ### Tools
-- **Vivado**: Xilinx Vivado für FPGA-Synthese und Implementierung
-- **Simulator**: ModelSim/Vivado Simulator für Verifikation
-- **Hardware**: Ziel-FPGA (zu spezifizieren)
+- **Simulator**: GHDL (VHDL-2008) mit GTKWave zur Wellenformansicht
+- **Synthese und Place & Route**: GHDL + yosys und openXC7 (`nextpnr-xilinx`), wie in den Voraufgaben verwendet
+- **Laden auf das FPGA**: `openFPGALoader`
+- **Alternativ**: Vivado (Xilinx) für Synthese und Implementierung
+- **Hardware**: Arty S7-50 (`xc7s50csga324-1`), wie in den Voraufgaben verwendet; für das Gesamtsystem zu bestätigen
 
-### Workflow
+### Simulation (Beispiel `Voraufgaben /sram`)
+
 ```bash
-# 1. Synthese
-vivado -mode batch -source synth.tcl
-
-# 2. Implementierung
-vivado -mode batch -source impl.tcl
-
-# 3. Bitstream-Generierung
-vivado -mode batch -source bitstream.tcl
-
-# 4. Flashen
-# (Hardware-spezifisch)
+mkdir -p sim
+ghdl -a --std=08 --workdir=sim sram.vhd sram_tb.vhd
+ghdl -e --std=08 --workdir=sim -o sim/sram_tb sram_tb
+./sim/sram_tb --wave=sim/sram_tb.ghw
+gtkwave sim/sram_tb.ghw
 ```
+
+Weitere Hinweise (FPGA-Skript `fpga.sh`) stehen in `Voraufgaben /README`.
 
 ---
 
@@ -156,24 +166,3 @@ vivado -mode batch -source bitstream.tcl
 
 ---
 
-## 🤝 Beitrag
-
-1. Fork des Repositories
-2. Branch für neue Features (`git checkout -b feature/[name]`)
-3. Commit der Änderungen (`git commit -m 'Add some feature'`)
-4. Push zum Branch (`git push origin feature/[name]`)
-5. Pull Request erstellen
-
----
-
-## 📜 Lizenz
-
-[Hier Lizenzinformationen einfügen, z.B. MIT, Apache 2.0 etc.]
-
----
-
-## 📞 Kontakt
-
-Bei Fragen oder Anregungen:
-- [Ihr Name] - [Ihre E-Mail]
-- Projekt-Link: [GitHub-Repository]

@@ -1,0 +1,37 @@
+# MIPS mit Komplexzahl-Beschleuniger (menschliche Implementierung)
+
+Das ist das eigentliche, durch den Menschen entwickelte Projekt: eine MIPS-CPU, die über ein
+Bus-System mit Speicher, UART und einem Beschleuniger für komplexe Zahlen verbunden wird.
+Die Aufgabenstellung und der Versuchsablauf stehen in der [Haupt-README](../README.md).
+
+## Busstruktur
+
+![Busstruktur](../Busstruktur_logisch(1).svg)
+
+## Inhalt des Ordners
+
+| Pfad | Inhalt | Stand |
+|------|--------|-------|
+| `CPU/` | Gegebene MIPS-CPU (Datenpfad, Steuerwerk, ALU, Registerfile, PC, Instruktionsspeicher, Multiplexer, Sign-/Zero-Extend, Shifter) | vorhanden |
+| `soc_top.vhd` | Bus-Struktur (Entity `soc_top`) | nur Democode, noch keine fertige Implementierung |
+| `RAM/` | Speicherblock am Bus (Basis: `Voraufgaben /sram`) | noch leer |
+| `UART/` | UART-Testblock zum Laden von Assemblerskripten und Testen der Ausgaben | noch leer |
+| `KomplexerBeschläuniger/` | Hardware-Beschleuniger für komplexe Zahlen | noch leer |
+
+Hinweis: `bus` ist in VHDL ein Schlüsselwort und darf nicht als Entity-Name verwendet werden.
+Deshalb heißt die Bus-Datei `soc_top.vhd` und die Entity `soc_top`.
+
+## Hauptkomponenten der CPU (`CPU/`)
+
+- `DataPath.vhd` – Datenpfad, verbindet die Teilblöcke
+- `ControlUnit.vhd`, `MainDecoder.vhd`, `ALUdecoder.vhd` – Steuerwerk
+- `ALU.vhd` (mit `ALU_suma.vhd`, `alu_sum_res.vhd`, `corrimiento.vhd`) – Rechenwerk und Shifter
+- `Register_File.vhd`, `PC.vhd`, `Instruction_Memory.vhd` – Register, Programmzähler, Befehlsspeicher
+- `SignExtend.vhd`, `zero_extend.vhd`, `Mux_2to1_5bits.vhd`, `Mux_2to1_32b.vhd`, `mux_4_32b.vhd` – Hilfsblöcke
+
+## Nächste Schritte
+
+1. Bus (`soc_top.vhd`) vollständig implementieren: Adressdekodierung und Auswahl der Teilnehmer.
+2. Speicher (`RAM/`) auf Basis von `Voraufgaben /sram/sram.vhd` anbinden.
+3. UART-Testblock und Beschleuniger entwickeln und am Bus anschließen.
+4. Test über Assemblerskripte per UART auf dem FPGA.
